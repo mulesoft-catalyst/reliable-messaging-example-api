@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	 xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/amqp http://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd">
+
+	<flow name="message-acquisition-flow" doc:id="d8e92a34-d34d-4e1a-bce3-7405b9010241" >
+		<http:listener doc:name="Listener" doc:id="88476dbb-04af-429d-83f3-20714be8d406" config-ref="HTTP_Listener_config" path="/employee">
+			<http:response statusCode="202" >
+				<http:body ><![CDATA[{
+  "response" : "Message accepted, processing asynchronously"
+}]]></http:body>
+			</http:response>
+			<http:error-response statusCode="400" />
+		</http:listener>
+		<amqp:publish doc:name="publish-message" doc:id="5c2bcc7b-8b43-4e20-b8ed-44b76926ba98" config-ref="AMQP_Config" exchangeName="${rabbitmq.empexchange}" sendCorrelationId="AUTO">
+			<amqp:routing-keys>
+				<amqp:routing-key value="${rabbitmq.empqueue}" />
+			</amqp:routing-keys>
+		</amqp:publish>
+	</flow>
+	<flow name="message-processing-flow" doc:id="cd5f342b-ee6a-491d-b291-22332052a1a5" >
+		<amqp:listener doc:name="Listener" doc:id="807b8420-9743-4485-a16a-5ec901bd36fb" config-ref="AMQP_Config" queueName="${rabbitmq.empqueue}" ackMode="MANUAL"/>
+		<logger level="INFO" doc:name="consume-message" doc:id="c7a6682f-524a-4b74-b273-99c1cd9bdfe0" message="consume message :- #[payload]"/>
+		<amqp:ack doc:name="acknowledge-message" doc:id="dff74f3c-35b7-403a-886d-831e546eaeda" ackId="#[attributes.ackId]"/>
+	</flow>
+</mule>

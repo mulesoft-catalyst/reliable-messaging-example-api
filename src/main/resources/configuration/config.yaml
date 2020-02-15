@@ -1,0 +1,11 @@
+http:
+  port: "8081"
+  
+rabbitmq:
+  host: "localhost"
+  port: "5672"
+  virtualHost: "dev"
+  username: "guest"
+  password: "guest"
+  empexchange: "employee-exchange"
+  empqueue: "employee-queue"

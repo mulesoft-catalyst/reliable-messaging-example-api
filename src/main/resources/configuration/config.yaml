@@ -1,6 +1,6 @@
 http:
   port: "8081"
-  
+
 rabbitmq:
   host: "localhost"
   port: "5672"
@@ -9,3 +9,12 @@ rabbitmq:
   password: "guest"
   empexchange: "employee-exchange"
   empqueue: "employee-queue"
+  empretryqueue: "employee-retry-queue"
+  emperrorqueue: "employee-error-queue"
+  empdelayqueue: "employee-delay-queue"
+
+
+
+retry:
+  threshold: "3"
+  ttl: "5"

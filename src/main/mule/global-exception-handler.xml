@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/amqp http://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<error-handler name="all-error-handler"
+		doc:id="e11d80c1-b639-41ee-8193-42a3054eb188">
+		<on-error-continue enableNotifications="true"
+			logException="true" doc:name="On Error Continue" doc:id="c8d01c0a-7632-4604-976e-5fd2fe66445d"
+			type="ANY">
+			<amqp:ack doc:name="acknowledge-message" doc:id="8707682b-1b06-4d21-8468-75121bc0381a"
+				ackId="#[attributes.ackId]" />
+			<choice doc:name="Choice" doc:id="325c8d93-bab4-4dec-9457-839972b6d51f">
+				<when expression="#[error.errorType.namespace =='MYEXCEPTION']">
+					<logger level="INFO" doc:name="Logger" doc:id="3d7e0008-037f-4f89-81f9-6ae27a835c40" message='Retriable Exception'/>
+		
+					    <set-variable value="#[attributes.headers['x-retry-count']]" doc:name="Get Retry Count" doc:id="4fe1c145-745e-4b07-b6bf-549a8d25ac21" variableName="retrycount"/>
+		                <choice doc:name="Choice" doc:id="360f9c1d-0ce8-494c-856d-8616a7e15e44" >
+						<when expression="#[p('retry.threshold')  &gt; vars.retrycount]" doc:id="88ce027e-8a71-4812-8968-fb8642f3a275">
+							<logger level="INFO" doc:name="Logger" doc:id="eef304cd-76e8-424c-92f1-a1955308bfa7" message="Within Threshold so pushing it to Delay Q with some standard delay"/>
+							<set-variable value="#[attributes.headers['x-retry-count'] + 1]" doc:name="Increment Count" doc:id="0bb05b1b-1f18-4636-91d3-5d711627dddf" variableName="retrycount" />
+							<amqp:publish doc:name="Publish to Delay Q" doc:id="c4ebb88b-aca3-46d1-b4ad-d489a6a987b6" config-ref="AMQP_Config" >
+								<amqp:routing-keys >
+									<amqp:routing-key value="${rabbitmq.empdelayqueue}" />
+								</amqp:routing-keys>
+								<amqp:message >
+									<amqp:properties expiration="${retry.ttl}" />
+									<amqp:headers ><![CDATA[#[%dw 2.0
+var retrycount = vars.retrycount
+output application/java
+---
+{
+  "x-retry-count": retrycount
+}]]]></amqp:headers>
+								</amqp:message>
+							</amqp:publish>
+						</when>
+						<otherwise>
+							<logger level="INFO" doc:name="Logger" doc:id="33f87c2c-9ed7-49a5-a913-3a95e8c16348" message="Beyond Threshold so pushing to retry q"/>
+							<amqp:publish doc:name="Publish to Retry Q" doc:id="9963cdbf-49fb-49ce-a7e0-2c578a6673d3" config-ref="AMQP_Config">
+						<amqp:routing-keys>
+							<amqp:routing-key value="${rabbitmq.empretryqueue}" />
+						</amqp:routing-keys>
+						<amqp:message>
+							<amqp:headers><![CDATA[#[%dw 2.0
+var retrycount = vars.retrycount
+output application/java
+---
+{
+  "x-retry-count": retrycount
+}]]]></amqp:headers>
+						</amqp:message>
+					</amqp:publish>
+					</otherwise>
+					</choice>
+					
+				</when>
+				<otherwise >
+				    <logger level="INFO" doc:name="Logger" doc:id="4abfddc7-d7ab-4f89-a8b4-55978dfa4d44" message="Unknown or Permanent Errors "/>
+				     
+					<amqp:publish doc:name="Publish to Error Q" doc:id="51d97692-6506-4bc7-8f20-03a7d6d7cb01" config-ref="AMQP_Config">
+						<amqp:routing-keys >
+							<amqp:routing-key value="${rabbitmq.emperrorqueue}" />
+						</amqp:routing-keys>
+					</amqp:publish>
+					
+					
+				</otherwise>
+			</choice>
+		</on-error-continue>
+	</error-handler>
+</mule>

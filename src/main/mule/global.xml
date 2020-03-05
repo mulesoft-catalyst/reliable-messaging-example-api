@@ -16,4 +16,5 @@ http://www.mulesoft.org/schema/mule/amqp http://www.mulesoft.org/schema/mule/amq
 	<amqp:config name="AMQP_Config" doc:name="AMQP Config" doc:id="81b84b13-32b4-40a7-b1b7-2be96cd96fb9" >
 		<amqp:connection host="${rabbitmq.host}" port="${rabbitmq.port}" virtualHost="${rabbitmq.virtualHost}" username="${rabbitmq.username}" password="${rabbitmq.password}" />
 	</amqp:config>
+	<configuration doc:name="Configuration" doc:id="5edb84f7-80ec-4ccf-882b-9e48a1b207e3" defaultErrorHandler-ref="all-error-handler" />
 	</mule>

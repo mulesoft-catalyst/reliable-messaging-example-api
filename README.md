@@ -13,8 +13,6 @@ This approach also ensures that the mule application will be decoupled into smal
 The following diagram should articulate how this can be implemented:
 ![](./docs/images/Reliable_Message_Processing_Using_RabbitMQ.png)
 
-This ensure that every application that uses this policy has isolated circuit state values.
-
 ### Usage
 To test this example, you will require access to RabbitMQ. If not you can install it locally:
 

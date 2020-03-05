@@ -3,7 +3,10 @@
 This is an example API to showcase how reliable messaging can be achieved using RabbitMQ as a messaging platform
 
 ### Why?
-When working on layered architecture (API Led is a good example) it doesn't make sense to propagate the incoming requests when we know that some component of this architecture is not working correctly. This policy provides an entry point for the consumer, preventing spreading calls through the different layers, giving time to failing resources to recover.
+By separating different components with message queues, you create more fault tolerance. If one part of the system is ever unreachable, the other can still continue to interact with the queue.
+
+
+This approach also ensures that the mule application will be decoupled into smaller, independent building blocks that are easier to develop, deploy and maintain and increases scalability.
 
 ### How?
 
@@ -32,20 +35,6 @@ When creating delay queue, ensure you configure "dead letter exchange" and "dead
 ![](./docs/images/delay_queue_config.png)
 
 
-#### Development
-
-
-
-##### Dependencies
-
-
-
-### Contribution
-
-
-Just fork the repo, make your updates and open a pull request!
-
-### Todos
 
 
 License

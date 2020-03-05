@@ -1,4 +1,4 @@
-# Reliable Messaing Using Rabbit MQ
+# Reliable Messaging Using Rabbit MQ
 
 This is an example API to showcase how reliable messaging can be achieved using RabbitMQ as a messaging platform
 

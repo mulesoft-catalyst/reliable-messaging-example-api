@@ -16,6 +16,12 @@
 		<app.runtime>4.2.2</app.runtime>
 		<mule.maven.plugin.version>3.3.5</mule.maven.plugin.version>
 	</properties>
+	
+	<scm>
+             <connection>scm:git:git@github.com:mulesoft-consulting/reliable-messaging-example-api.git</connection>
+             <developerConnection>scm:git:git@github.com:mulesoft-consulting/reliable-messaging-example-api.git</developerConnection>
+	     <url>git@github.com:mulesoft-catalyst/reliable-messaging-example-api.git</url>
+         </scm>
 
 	<build>
 		<plugins>
